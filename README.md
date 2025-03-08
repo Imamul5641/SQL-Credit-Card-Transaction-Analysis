@@ -88,7 +88,7 @@ I plan to extend this project by:
 ## 📬 Connect With Me
 If you liked this project or would like to collaborate, feel free to connect with me on:
 - 💼 [LinkedIn](https://www.linkedin.com/in/imamul-hasan-5420b1241/)
-- 📧 Email: your.email@gmail.com
+- 📧 Email: imamulhasan6553@gmail.com
 
 ## ⭐ Star This Repository
 If you found this project helpful, please consider giving it a **star** ⭐ on GitHub.
