@@ -1,11 +1,26 @@
-select * 
-from credit_card_transcations;
+select * from credit_card_transcations;
 --1- write a query to print top 5 cities with highest spends and their percentage contribution of total credit card spends
 with total_spent_cte as (select sum(cast(amount as bigint)) as total_spent from credit_card_transcations)
 select top 5 city,sum(amount) as expense,total_spent,cast((sum(amount)*1.0 /total_spent) * 100 as decimal(5,2)) as percentage_contribution
 from credit_card_transcations, total_spent_cte
 group by city,total_spent
 order by expense desc;
+
+-- Approach 2
+create procedure highest_spend_5
+AS
+BEGIN
+    DECLARE @total_sum bigint
+    select @total_sum = sum(cast(amount as bigint)) from credit_card_transactions;
+    
+    select top 5 city, sum(amount) as expense,
+    cast(((sum(amount)*1.0)/@total_sum)*100 as decimal(5,2)) as expense_percentage
+    from credit_card_transactions
+    GROUP BY city
+    order by expense_percentage desc 
+END
+
+exec highest_spend_5
 
 --2- write a query to print highest spend month and amount spent in that month for each card type
 with cte as (
@@ -35,7 +50,6 @@ where cum_sum>=1000000
 where rn=1;
 
 --4- write a query to find city which had lowest percentage spend for gold card type
-
 select city,sum(amount) as total_spend
 , sum(case when card_type='Gold' then amount else 0 end) as gold_spend
 ,sum(case when card_type='Gold' then amount else 0 end)*1.0/sum(amount)*100 as gold_contribution
@@ -110,9 +124,25 @@ group by city
 having count(*)=2
 order by days_to_500 asc
 
-with cte1 as(select * from (select *,row_number() over (partition by city order by transaction_date ) as dnfrom credit_card_transactions)Awhere A.dn=500),cte2 as(select city,min(transaction_date) as min_transaction_datefrom credit_card_transactionsgroup by city),cte3 as(select a.city,datediff(day,b.min_transaction_date,a.transaction_date) as no_of_days from cte1 ainner join cte2 bon a.city=b.city)select distinct city,no_of_days from cte3 where no_of_days in (select min(no_of_days) from cte3)
-
-bangalore 
-1-jan-2023 -> 100
-2-jan-2023 -> 200
-3-jan-2023 -> 230
+with cte1 as
+(
+select * from (
+select *,
+row_number() over (partition by city order by transaction_date ) as dn
+from credit_card_transactions
+)A
+where A.dn=500
+),
+cte2 as
+(
+select city,min(transaction_date) as min_transaction_date
+from credit_card_transactions
+group by city
+),
+cte3 as
+(select a.city,
+datediff(day,b.min_transaction_date,a.transaction_date) as no_of_days from cte1 a
+inner join cte2 b
+on a.city=b.city
+)
+select distinct city,no_of_days from cte3 where no_of_days in (select min(no_of_days) from cte3)
